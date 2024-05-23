@@ -7,6 +7,12 @@
       "dependencies": {},
       "hash": "fbe0bf85155f42f8832205f7b3ac3df571ada33e"
     },
+    "com.statecontroller": {
+      "version": "file:../Packages_Custom/StateController",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.tuyoogame.yooasset": {
       "version": "file:../Packages_Custom/YooAsset",
       "depth": 0,
