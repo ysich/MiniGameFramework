@@ -11,8 +11,7 @@ public static class Game
     private static readonly Queue<ISingleton> m_Updates = new Queue<ISingleton>();
     private static readonly Queue<ISingleton> m_LateUpdates = new Queue<ISingleton>();
     
-
-    public static ISingleton AddSingleton<T>() where T : Core.Singleton<T>, new()
+    public static T AddSingleton<T>() where T : Core.Singleton<T>, new()
     {
         T singleton = new T();
         AddSingleton(singleton);
