@@ -10,5 +10,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GlobalConfig",menuName = "Settings/Global Config",order = 0)]
 public class GlobalConfig:ScriptableObject
 {
+    public string productName;
+    public string version;
     public LogLevelType logLevelType;
+    public BuildType buildType;
 }

@@ -12,3 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39d5b1dce1654c75b6ff93ff9d3526f3, type: 3}
   m_Name: GlobalConfig
   m_EditorClassIdentifier: 
+  productName: test
+  version: 0.0.0
+  logLevelType: 3
+  buildType: 1
