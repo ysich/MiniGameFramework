@@ -2,7 +2,7 @@
   "name": "com.test.mini-game-framework",
   "displayName": "MiniGameFramework",
   "description": "MiniGameFramework",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "",
   "keywords": [],
   "author": {
@@ -10,6 +10,6 @@
   },
   "hideInEditor": false,
   "dependencies": {
-    "com.tuyoogame.yooasset": ""
+    "com.tuyoogame.yooasset": "2.1.1"
   }
 }
