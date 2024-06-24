@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PackageName="com.test.mini-game-framework"
-Version="0.0.1"
+Version="0.0.2"
 VersionStr="v$Version"
 
 SCRIPT_DIR=$(dirname $(readlink -f $0))
