@@ -13,6 +13,14 @@
       "source": "local",
       "dependencies": {}
     },
+    "com.test.mini-game-framework": {
+      "version": "file:com.test.mini-game-framework",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.tuyoogame.yooasset": ""
+      }
+    },
     "com.tuyoogame.yooasset": {
       "version": "file:../Packages_Custom/YooAsset",
       "depth": 0,
