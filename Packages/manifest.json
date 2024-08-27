@@ -1,7 +1,8 @@
 {
   "dependencies": {
+    "com.cysharp.memorypack": "file:../Packages_Custom/MemoryPack",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-	"com.statecontroller": "file:../Packages_Custom/StateController",
+    "com.statecontroller": "file:../Packages_Custom/StateController",
     "com.tuyoogame.yooasset": "file:../Packages_Custom/YooAsset",
     "com.unity.collab-proxy": "2.0.1",
     "com.unity.feature.development": "1.0.1",
