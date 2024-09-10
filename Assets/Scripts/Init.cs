@@ -19,7 +19,7 @@ public class Init : MonoBehaviour
 
     private async UniTaskVoid StartAsync()
     {
-        // await Game.AddSingleton<ResourceMgr>().CreatePackageAsync("MainPackage",true);
+        await Game.AddSingleton<ResourceMgr>().CreatePackageAsync("MainPackage",true);
     }
 
     private void Update()
