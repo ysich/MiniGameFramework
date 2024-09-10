@@ -39,7 +39,7 @@ namespace Core.Module.Resources
                     break;
                 case EPlayMode.OfflinePlayMode:
                     OfflinePlayModeParameters offlinePlayModeParameters = new OfflinePlayModeParameters();
-                    // initParameters.DecryptionServices = new FileOffsetDecryption(); //需要补充这个
+                    // initParameters.DecryptionServices = new FileOffsetDecryption(); //如果加密了需要解密
                     await package.InitializeAsync(offlinePlayModeParameters).Task;
                     break;
                 case EPlayMode.HostPlayMode:
