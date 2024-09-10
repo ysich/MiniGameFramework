@@ -1,12 +1,16 @@
 ﻿/*---------------------------------------------------------------------------------------
 -- 负责人: onemt
--- 创建时间: 2024-05-27 16:48:45
+-- 创建时间: 2024-09-10 17:09:00
 -- 概述:
 ---------------------------------------------------------------------------------------*/
 
-namespace Core{
-    public class GlobalOptions:Singleton<GlobalOptions>
+namespace Core.Module.CodeLoader
+{
+    public class CodeLoader:Singleton<CodeLoader>
     {
-        public GlobalConfig globalConfig;
+        public void Start()
+        {
+            
+        }
     }
 }

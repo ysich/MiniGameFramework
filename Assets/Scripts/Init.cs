@@ -1,4 +1,5 @@
 using Core;
+using Core.Module.CodeLoader;
 using Core.Module.Resources;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -9,17 +10,21 @@ public class Init : MonoBehaviour
     public GlobalConfig globalConfig;
     private void Start()
     {
-        Game.AddSingleton<GlobalOptions>().globalConfig = globalConfig;
-        Game.AddSingleton<Logger>().ILog = new UnityLogger();
-        // Game.AddSingleton<TimeInfo>();
-        Game.AddSingleton<ObjectPool>();
-
-        StartAsync();
+        StartAsync().Forget();
     }
 
     private async UniTaskVoid StartAsync()
     {
+        DontDestroyOnLoad(gameObject);
+        //放到这里面让逻辑看起来完整点
+        Game.AddSingleton<GlobalOptions>().globalConfig = globalConfig;
+        Game.AddSingleton<Logger>().ILog = new UnityLogger();
+        // Game.AddSingleton<TimeInfo>();
+        Game.AddSingleton<ObjectPool>();
+        
         await Game.AddSingleton<ResourceMgr>().CreatePackageAsync("MainPackage",true);
+
+        Game.AddSingleton<CodeLoader>().Start();
     }
 
     private void Update()
