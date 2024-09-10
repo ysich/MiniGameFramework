@@ -12,36 +12,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 185f6993d5150494d98da50e26cb1c25, type: 3}
   m_Name: AssetBundleCollectorSetting
   m_EditorClassIdentifier: 
-  ShowPackageView: 1
-  ShowEditorAlias: 1
+  ShowPackageView: 0
+  ShowEditorAlias: 0
   UniqueBundleName: 0
   Packages:
-  - PackageName: UI
+  - PackageName: MainPackage
     PackageDesc: 
-    EnableAddressable: 0
+    EnableAddressable: 1
     LocationToLower: 0
     IncludeAssetGUID: 0
     IgnoreDefaultType: 1
-    AutoCollectShaders: 1
+    AutoCollectShaders: 0
     Groups:
     - GroupName: UI
       GroupDesc: 
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/BundleAssets/UI/AtlasIcon
-        CollectorGUID: c9b2c888a26220c4ca4bd54f8049ddf8
+      - CollectPath: Assets/BundleAssets/UI
+        CollectorGUID: c18229c3d79a89a48a241e885fea3415
         CollectorType: 0
         AddressRuleName: AddressByFileName
-        PackRuleName: PackSeparately
-        FilterRuleName: CollectAll
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectPrefab
         AssetTags: 
         UserData: 
-      - CollectPath: Assets/BundleAssets/UI/Prefabs
-        CollectorGUID: 231f1bacbcf9d484bb50ebbd437532e9
+      - CollectPath: Assets/BundleAssets/UI/Atlas
+        CollectorGUID: 47bea413dcaa73c4abe5ebcf49e04ae9
         CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackSeparately
+        FilterRuleName: CollectSprite
+        AssetTags: 
+        UserData: 
+    - GroupName: Model
+      GroupDesc: 
+      AssetTags: 
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/BundleAssets/Model
+        CollectorGUID: 6bb7cccc963ad5d49b2ea046c75c899b
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
