@@ -29,11 +29,11 @@ MonoBehaviour:
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/BundleAssets/UI
-        CollectorGUID: c18229c3d79a89a48a241e885fea3415
+      - CollectPath: Assets/BundleAssets/UI/Module
+        CollectorGUID: 9fa9822e4246fcd4eb20d1082120e23e
         CollectorType: 0
         AddressRuleName: AddressByFileName
-        PackRuleName: PackDirectory
+        PackRuleName: PackTopDirectory
         FilterRuleName: CollectPrefab
         AssetTags: 
         UserData: 
@@ -56,5 +56,18 @@ MonoBehaviour:
         AddressRuleName: AddressByFileName
         PackRuleName: PackDirectory
         FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 
+    - GroupName: Scene
+      GroupDesc: 
+      AssetTags: 
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/BundleAssets/Scene
+        CollectorGUID: 548fb9044dde6d647ac73c16b5976e2c
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackSeparately
+        FilterRuleName: CollectScene
         AssetTags: 
         UserData: 
