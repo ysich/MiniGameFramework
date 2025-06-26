@@ -1,10 +1,4 @@
-﻿/*---------------------------------------------------------------------------------------
--- 负责人: onemt
--- 创建时间: 2024-05-27 16:48:45
--- 概述:
----------------------------------------------------------------------------------------*/
-
-namespace Core{
+﻿namespace Core{
     public class GlobalOptions:Singleton<GlobalOptions>
     {
         public GlobalConfig globalConfig;
