@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Onemt.Core.Util;
+using Framework_Export;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Editor
+namespace FrameworkEditor
 {
     public class EditorHelper
     {
@@ -23,10 +23,6 @@ namespace Editor
             typeof(Button),
             typeof(InputField),
             typeof(ScrollRect),
-            // typeof(LoopHorizontalScrollRect),
-            // typeof(LoopVerticalScrollRect),
-            // typeof(LoopHorizontalScrollRectMulti),
-            // typeof(LoopVerticalScrollRectMulti),
             typeof(Dropdown),
             typeof(Animator),
             typeof(Image),
