@@ -6,11 +6,11 @@ using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
-namespace Editor.Tools
+namespace FrameworkEditor.Tools.SimilarityQuery
 {
     public class SimilarityQueryWindow : EditorWindow
     {
-        [MenuItem("Tools/Window/相同资源查找窗口",false,2)]
+        
         public static void ShowWindow()
         {
             SimilarityQueryWindow.ShowWindow(false);

@@ -1,4 +1,4 @@
-namespace Editor.Tools
+namespace FrameworkEditor.Tools.SimilarityQuery
 {
     public enum SimilarityQueryType
     {

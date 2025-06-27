@@ -1,9 +1,3 @@
-/*---------------------------------------------------------------------------------------
--- 负责人: onemt
--- 创建时间: 2024-09-02 14:45:39
--- 概述:
----------------------------------------------------------------------------------------*/
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +5,7 @@ using SimpleJSON;
 using UnityEditor;
 using UnityEngine;
 
-namespace Editor.Tools.UIWidgetRepository
+namespace FrameworkEditor.Tools.UIWidgetRepository
 {
     public class UIWidgetRepositoryConfiguration:IDisposable
     {

@@ -1,9 +1,3 @@
-/*---------------------------------------------------------------------------------------
--- 负责人: onemt
--- 创建时间: 2024-08-08 16:33:08
--- 概述:
----------------------------------------------------------------------------------------*/
-
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -13,7 +7,7 @@ using SimpleJSON;
 using UnityEditor.SceneManagement;
 using UnityEngine.UI;
 
-namespace Editor.Tools.UIWidgetRepository
+namespace FrameworkEditor.Tools.UIWidgetRepository
 {
     public static class UIWidgetRepositoryHelper
     {

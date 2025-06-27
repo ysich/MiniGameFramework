@@ -1,9 +1,3 @@
-/*---------------------------------------------------------------------------------------
--- 负责人: onemt
--- 创建时间: 2023-12-14 10:34:36
--- 概述:
----------------------------------------------------------------------------------------*/
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Editor.Tools
+namespace FrameworkEditor.Tools.SimilarityQuery
 {
     public static class SimilarityQueryHelper
     {

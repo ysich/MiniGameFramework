@@ -1,16 +1,10 @@
-/*---------------------------------------------------------------------------------------
--- 负责人: onemt
--- 创建时间: 2024-08-08 15:49:33
--- 概述:
----------------------------------------------------------------------------------------*/
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.UI;
 
-namespace Editor.Tools.UIWidgetRepository
+namespace FrameworkEditor.Tools.UIWidgetRepository
 {
     public class UIWidgetRepositoryInputNameWindow:EditorWindow
     {

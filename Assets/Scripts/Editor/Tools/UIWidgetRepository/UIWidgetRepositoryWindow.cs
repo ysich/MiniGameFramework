@@ -1,9 +1,3 @@
-/*---------------------------------------------------------------------------------------
--- 负责人: onemt
--- 创建时间: 2024-08-08 09:46:47
--- 概述:
----------------------------------------------------------------------------------------*/
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using Object = UnityEngine.Object;
 
-namespace Editor.Tools.UIWidgetRepository
+namespace FrameworkEditor.Tools.UIWidgetRepository
 {
     public class UIWidgetRepositoryWindow : EditorWindow
     {
@@ -41,7 +35,6 @@ namespace Editor.Tools.UIWidgetRepository
         public const int kWindowWidth = 1300;
         public const int kWindowHeight = 636;
         
-        [MenuItem("Tools/Window/UI组件库",false,1)]
         public static void ShowWindow()
         {
             UIWidgetRepositoryWindow window = (UIWidgetRepositoryWindow)GetWindow(typeof(UIWidgetRepositoryWindow));

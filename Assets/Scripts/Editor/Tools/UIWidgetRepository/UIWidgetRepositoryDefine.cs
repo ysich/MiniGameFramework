@@ -1,10 +1,4 @@
-/*---------------------------------------------------------------------------------------
--- 负责人: onemt
--- 创建时间: 2024-08-08 16:27:11
--- 概述:
----------------------------------------------------------------------------------------*/
-
-namespace Editor.Tools.UIWidgetRepository
+namespace FrameworkEditor.Tools.UIWidgetRepository
 {
     public class UIWidgetRepositoryDefine
     {

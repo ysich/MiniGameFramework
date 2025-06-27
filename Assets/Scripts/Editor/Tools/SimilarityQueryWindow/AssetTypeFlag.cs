@@ -1,4 +1,4 @@
-namespace Editor.Tools
+namespace FrameworkEditor.Tools
 {
     public enum AssetTypeFlag
     {
