@@ -11,7 +11,7 @@ namespace Core.Module.UI
         
         public UIManager Manager => uiManager;
         
-        public void Awake()
+        public void Awake() 
         {
             uiManager = UIManager.Instance;
         }
