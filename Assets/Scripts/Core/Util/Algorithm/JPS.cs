@@ -233,6 +233,18 @@ namespace Core
             return null;
         }
 
+        /// <summary>
+        /// 判断是否是跳点
+        /// 不是每个格子都需要检查，只在"跳点"处停下来
+        /// 跳点包括：
+        ///     终点
+        ///     有"强迫邻居"的点
+        ///     斜向移动时，水平/垂直方向上有跳点的点
+        /// </summary>
+        /// <param name="grids"></param>
+        /// <param name="pos"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
         private bool IsJumpPoint(int[,] grids, Vector2Int pos, Vector2Int dir)
         {
             if (pos == m_end) return true;
@@ -284,7 +296,9 @@ namespace Core
         }
 
         /// <summary>
-        ///  强迫邻居节点
+        ///  是否是强迫邻居节点
+        ///  在斜向移动时，如果前进方向的侧边不可走，且前进方向前方和侧前方可走，则侧前方为强迫邻居节点
+        ///  在水平或垂直移动时，如果前进方向的侧边不可走，且前进方向前方和侧前方可走，则侧前方为强迫邻居节点
         /// </summary>
         /// <returns></returns>
         private bool HasForceNeighbour(int[,] grids, Vector2Int pos, Vector2Int dir)
@@ -326,6 +340,19 @@ namespace Core
         {
             FindForceNeighbour(grids, pos.x, pos.y, dir, ref neighbour1, ref neighbour2);
         }
+
+        /// <summary>
+        ///  查找当前点 在移动方向上的 强迫邻居节点
+        ///  强迫邻居节点：
+        ///     在斜向移动时，如果前进方向的侧边不可走，且前进方向前方和侧前方可走，则侧前方为强迫邻居节点
+        ///     在水平或垂直移动时，如果前进方向的侧边不可走，且前进方向前方和侧前方可走，则侧前方为强迫邻居节点
+        /// </summary>
+        /// <param name="grids"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="dir"></param>
+        /// <param name="neighbour1"></param>
+        /// <param name="neighbour2"></param>
 
         private void FindForceNeighbour(int[,] grids, int x, int y, Vector2Int dir, ref Vector2Int neighbour1, ref Vector2Int neighbour2)
         {
@@ -372,7 +399,7 @@ namespace Core
         }
 
         /// <summary>
-        ///  不检查边界
+        ///  是否是障碍物(不包括边界)
         /// </summary>
         private bool IsBlockNoBorder(int[,] grids, Vector2Int pos)
         {
