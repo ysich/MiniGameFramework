@@ -3,6 +3,7 @@ using System;
 
 namespace Core.Module.UI
 {
+    [RequireComponent(typeof(CanvasGroup))]
     /// <summary>
     /// UI视图基类
     /// </summary>
@@ -10,8 +11,7 @@ namespace Core.Module.UI
     {
         [Header("UI View Settings")]
         [SerializeField] protected string viewId;
-        [SerializeField] protected CanvasGroup canvasGroup;
-        [SerializeField] protected RectTransform rectTransform;
+        protected CanvasGroup canvasGroup;
         
         protected bool isInitialized = false;
         protected bool isVisible = false;
@@ -22,10 +22,7 @@ namespace Core.Module.UI
         
         protected virtual void Awake()
         {
-            if (canvasGroup == null)
-                canvasGroup = GetComponent<CanvasGroup>();
-            if (rectTransform == null)
-                rectTransform = GetComponent<RectTransform>();
+            canvasGroup = GetComponent<CanvasGroup>();
         }
         
         public virtual void Initialize()

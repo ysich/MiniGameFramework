@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Core.Singleton;
 
 namespace Core.Module.UI
 {
@@ -81,37 +79,38 @@ namespace Core.Module.UI
             
             return view;
         }
-        
+
         /// <summary>
         /// 创建视图
         /// </summary>
         private T CreateView<T>(string viewId, UILayer layer) where T : BaseUIView
         {
-            GameObject prefab = GetViewPrefab(viewId);
-            if (prefab == null)
-            {
-                Debug.LogError($"未找到视图预制体: {viewId}");
-                return null;
-            }
-            
-            Transform parent = GetLayerParent(layer);
-            if (parent == null)
-            {
-                Debug.LogError($"未找到层级父物体: {layer}");
-                return null;
-            }
-            
-            GameObject instance = Instantiate(prefab, parent);
-            T view = instance.GetComponent<T>();
-            
-            if (view == null)
-            {
-                Debug.LogError($"预制体 {viewId} 上没有找到 {typeof(T).Name} 组件");
-                Destroy(instance);
-                return null;
-            }
-            
-            return view;
+            // GameObject prefab = GetViewPrefab(viewId);
+            // if (prefab == null)
+            // {
+            //     Debug.LogError($"未找到视图预制体: {viewId}");
+            //     return null;
+            // }
+
+            // Transform parent = GetLayerParent(layer);
+            // if (parent == null)
+            // {
+            //     Debug.LogError($"未找到层级父物体: {layer}");
+            //     return null;
+            // }
+
+            // GameObject instance = Instantiate(prefab, parent);
+            // T view = instance.GetComponent<T>();
+
+            // if (view == null)
+            // {
+            //     Debug.LogError($"预制体 {viewId} 上没有找到 {typeof(T).Name} 组件");
+            //     Destroy(instance);
+            //     return null;
+            // }
+
+            // return view;
+            return null;
         }
         
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using Core.Singleton;
-
+﻿
 namespace Core.Module.UI
 {
     /// <summary>
