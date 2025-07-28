@@ -302,11 +302,6 @@ namespace Logic.Map.Editor
                 LoadMapData();
             }
             EditorGUILayout.EndHorizontal();
-
-            if (GUILayout.Button("导出为Lua格式"))
-            {
-                ExportToLua();
-            }
         }
 
         #endregion
@@ -437,29 +432,6 @@ namespace Logic.Map.Editor
                 catch (Exception e)
                 {
                     EditorUtility.DisplayDialog("错误", $"加载失败: {e.Message}", "确定");
-                }
-            }
-        }
-
-        private void ExportToLua()
-        {
-            if (currentMapData == null)
-            {
-                EditorUtility.DisplayDialog("错误", "没有地图数据可导出", "确定");
-                return;
-            }
-
-            string path = EditorUtility.SaveFilePanel("导出Lua文件", "Assets", "MapData", "lua");
-            if (!string.IsNullOrEmpty(path))
-            {
-                try
-                {
-                    ExportMapDataToLua(currentMapData, path);
-                    EditorUtility.DisplayDialog("成功", "Lua文件导出成功", "确定");
-                }
-                catch (Exception e)
-                {
-                    EditorUtility.DisplayDialog("错误", $"导出失败: {e.Message}", "确定");
                 }
             }
         }
