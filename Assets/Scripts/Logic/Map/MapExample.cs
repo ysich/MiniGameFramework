@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using UnityEngine; 
+using Logic.Map.Editor;
 
 namespace Logic.Map
 {
@@ -168,7 +169,7 @@ namespace Logic.Map
             var building = mapLoader.GetBuildingAtPosition(5, 5);
             if (building != null)
             {
-                Debug.Log($"位置(5,5)的建筑: ID={building.id}, 配置ID={building.cfgID}, 等级={building.level}");
+                Debug.Log($"位置(5,5)的建筑: ID={building.id}, 配置ID={building.cfgID}");
             }
             else
             {

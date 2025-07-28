@@ -4,24 +4,24 @@ using System.IO;
 using UnityEngine;
 using MemoryPack;
 
-namespace Onemt.Framework.Town
+namespace Logic.Map
 {
     /// <summary>
     /// 地图数据加载器
     /// </summary>
-    public class TownMapLoader : MonoBehaviour
+    public class MapLoader : MonoBehaviour
     {
         [Header("加载配置")]
-        [SerializeField] private string mapDataPath = "TownMapData";
+        [SerializeField] private string mapDataPath = "MapData";
         [SerializeField] private bool loadOnStart = true;
         [SerializeField] private bool autoInitialize = true;
 
         // 加载的地图数据
-        private TownMapData loadedMapData;
+        private MapData loadedMapData;
         private bool isDataLoaded = false;
 
         // 事件
-        public event Action<TownMapData> OnMapDataLoaded;
+        public event Action<MapData> OnMapDataLoaded;
         public event Action<string> OnLoadError;
 
         #region Unity生命周期
@@ -59,7 +59,7 @@ namespace Onemt.Framework.Town
                     throw new FileNotFoundException($"找不到地图数据文件: {path}");
                 }
 
-                loadedMapData = MemoryPackSerializer.Deserialize<TownMapData>(textAsset.bytes);
+                loadedMapData = MemoryPackSerializer.Deserialize<MapData>(textAsset.bytes);
                 isDataLoaded = true;
 
                 if (autoInitialize)
@@ -84,7 +84,7 @@ namespace Onemt.Framework.Town
         {
             try
             {
-                loadedMapData = MemoryPackSerializer.Deserialize<TownMapData>(bytes);
+                loadedMapData = MemoryPackSerializer.Deserialize<MapData>(bytes);
                 isDataLoaded = true;
 
                 if (autoInitialize)
@@ -152,7 +152,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取加载的地图数据
         /// </summary>
-        public TownMapData GetMapData()
+        public MapData GetMapData()
         {
             return loadedMapData;
         }
@@ -168,15 +168,15 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取建筑数据
         /// </summary>
-        public List<TownBuildingData> GetBuildings()
+        public List<MapBuildingData> GetBuildings()
         {
-            return isDataLoaded ? loadedMapData.buildings : new List<TownBuildingData>();
+            return isDataLoaded ? loadedMapData.buildings : new List<MapBuildingData>();
         }
 
         /// <summary>
         /// 根据ID获取建筑
         /// </summary>
-        public TownBuildingData GetBuilding(int id)
+        public MapBuildingData GetBuilding(int id)
         {
             return isDataLoaded ? loadedMapData.GetBuilding(id) : null;
         }
@@ -184,15 +184,15 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取可交互物数据
         /// </summary>
-        public List<TownElementData> GetElements()
+        public List<MapElementData> GetElements()
         {
-            return isDataLoaded ? loadedMapData.elements : new List<TownElementData>();
+            return isDataLoaded ? loadedMapData.elements : new List<MapElementData>();
         }
 
         /// <summary>
         /// 根据ID获取可交互物
         /// </summary>
-        public TownElementData GetElement(int id)
+        public MapElementData GetElement(int id)
         {
             return isDataLoaded ? loadedMapData.elements.Find(e => e.id == id) : null;
         }
@@ -200,25 +200,25 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取地皮数据
         /// </summary>
-        public List<TownTerrainData> GetTerrains()
+        public List<MapTerrainData> GetTerrains()
         {
-            return isDataLoaded ? loadedMapData.terrains : new List<TownTerrainData>();
+            return isDataLoaded ? loadedMapData.terrains : new List<MapTerrainData>();
         }
 
         /// <summary>
         /// 获取区域数据
         /// </summary>
-        public List<TownAreaData> GetAreas()
+        public List<MapAreaData> GetAreas()
         {
-            return isDataLoaded ? loadedMapData.areas : new List<TownAreaData>();
+            return isDataLoaded ? loadedMapData.areas : new List<MapAreaData>();
         }
 
         /// <summary>
         /// 获取网格掩码
         /// </summary>
-        public TownGridMaskType GetGridMask(int x, int y)
+        public MapGridMaskType GetGridMask(int x, int y)
         {
-            return isDataLoaded ? loadedMapData.GetGridMask(x, y) : TownGridMaskType.None;
+            return isDataLoaded ? loadedMapData.GetGridMask(x, y) : MapGridMaskType.None;
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取指定位置的建筑
         /// </summary>
-        public TownBuildingData GetBuildingAtPosition(int x, int y)
+        public MapBuildingData GetBuildingAtPosition(int x, int y)
         {
             if (!isDataLoaded) return null;
 
@@ -255,7 +255,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取指定位置的可交互物
         /// </summary>
-        public TownElementData GetElementAtPosition(int x, int y)
+        public MapElementData GetElementAtPosition(int x, int y)
         {
             if (!isDataLoaded) return null;
 
@@ -272,13 +272,13 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取指定位置的地皮
         /// </summary>
-        public TownTerrainData GetTerrainAtPosition(int x, int y)
+        public MapTerrainData GetTerrainAtPosition(int x, int y)
         {
             if (!isDataLoaded) return null;
 
             foreach (var terrain in loadedMapData.terrains)
             {
-                var (terrainX, terrainY, terrainEndX, terrainEndY) = TownMapHelper.DecodeLandRect(terrain.rect);
+                var (terrainX, terrainY, terrainEndX, terrainEndY) = MapHelper.DecodeLandRect(terrain.rect);
                 if (x >= terrainX && x <= terrainEndX && y >= terrainY && y <= terrainEndY)
                 {
                     return terrain;
@@ -290,7 +290,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取指定位置的区域
         /// </summary>
-        public TownAreaData GetAreaAtPosition(int x, int y)
+        public MapAreaData GetAreaAtPosition(int x, int y)
         {
             if (!isDataLoaded) return null;
 
@@ -316,7 +316,7 @@ namespace Onemt.Framework.Town
 
             // 检查网格掩码
             var mask = loadedMapData.GetGridMask(x, y);
-            if (TownMapHelper.IsMaskDisable(mask))
+            if (MapHelper.IsMaskDisable(mask))
             {
                 return false;
             }
@@ -340,7 +340,7 @@ namespace Onemt.Framework.Town
         /// </summary>
         public Vector3 GetGridWorldPosition(int gridX, int gridY)
         {
-            var pos = TownMapHelper.GridCenterWorldPos(gridX, gridY);
+            var pos = MapHelper.GridCenterWorldPos(gridX, gridY);
             return new Vector3(pos.x, 0, pos.y);
         }
 
@@ -349,7 +349,7 @@ namespace Onemt.Framework.Town
         /// </summary>
         public Vector2Int WorldToGrid(Vector3 worldPos)
         {
-            return TownMapHelper.Pos2Grid(worldPos.x, worldPos.z);
+            return MapHelper.Pos2Grid(worldPos.x, worldPos.z);
         }
 
         /// <summary>

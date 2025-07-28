@@ -498,7 +498,7 @@ namespace Logic.Map.Editor
             code.AppendLine("MapData.elements = {");
             foreach (var element in data.elements)
             {
-                code.AppendLine($"    [{element.id}] = {{ {element.cfgID}, {element.x}, {element.y}, {element.toward}, {element.areaId} }},");
+                code.AppendLine($"    [{element.id}] = {{ {element.cfgID}, {element.x}, {element.y}, {element.toward} }},");
             }
             code.AppendLine("}");
             code.AppendLine();

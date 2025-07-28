@@ -4,12 +4,12 @@ using System.IO;
 using UnityEngine;
 using MemoryPack;
 
-namespace Onemt.Framework.Town
+namespace Logic.Map.Editor
 {
     /// <summary>
     /// 地图编辑器核心类
     /// </summary>
-    public class TownMapEditor : MonoBehaviour
+    public class MapEditor : MonoBehaviour
     {
         [Header("地图配置")]
         [SerializeField] private int gridCountX = 40;
@@ -20,7 +20,7 @@ namespace Onemt.Framework.Town
 
         [Header("编辑器状态")]
         [SerializeField] private bool isEditing = false;
-        [SerializeField] private TownItemType currentEditType = TownItemType.Building;
+        [SerializeField] private MapItemType currentEditType = MapItemType.Building;
         [SerializeField] private int currentEditID = -1;
 
         [Header("调试显示")]
@@ -30,13 +30,13 @@ namespace Onemt.Framework.Town
         [SerializeField] private Color maskColor = Color.red;
 
         // 地图数据
-        private TownMapData mapData;
+        private MapData mapData;
         private int nextBuildingID = 1;
         private int nextElementID = 1;
 
         // 事件
-        public event Action<TownMapData> OnMapDataChanged;
-        public event Action<int, int, TownGridMaskType> OnGridMaskChanged;
+        public  Action<MapData> OnMapDataChanged;
+        public event Action<int, int, MapGridMaskType> OnGridMaskChanged;
 
         #region Unity生命周期
 
@@ -65,7 +65,7 @@ namespace Onemt.Framework.Town
         /// </summary>
         private void InitializeMapData()
         {
-            mapData = new TownMapData
+            mapData = new MapData
             {
                 gridCountX = gridCountX,
                 gridCountY = gridCountY,
@@ -102,7 +102,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 设置当前编辑类型
         /// </summary>
-        public void SetEditType(TownItemType type)
+        public void SetEditType(MapItemType type)
         {
             currentEditType = type;
             Debug.Log($"地图编辑器: 设置编辑类型为 {type}");
@@ -111,16 +111,15 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 添加建筑
         /// </summary>
-        public TownBuildingData AddBuilding(int cfgID, int x, int y, int toward = 0, int level = 1)
+        public MapBuildingData AddBuilding(int cfgID, int x, int y, int toward = 0, int level = 1)
         {
-            var building = new TownBuildingData
+            var building = new MapBuildingData
             {
                 id = nextBuildingID++,
                 cfgID = cfgID,
                 x = x,
                 y = y,
                 toward = toward,
-                level = level
             };
 
             mapData.AddBuilding(building);
@@ -142,16 +141,15 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 添加可交互物
         /// </summary>
-        public TownElementData AddElement(int cfgID, int x, int y, int toward = 0, int areaId = 0)
+        public MapElementData AddElement(int cfgID, int x, int y, int toward = 0, int areaId = 0)
         {
-            var element = new TownElementData
+            var element = new MapElementData
             {
                 id = nextElementID++,
                 cfgID = cfgID,
                 x = x,
                 y = y,
                 toward = toward,
-                areaId = areaId
             };
 
             mapData.AddElement(element);
@@ -173,10 +171,10 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 添加地皮
         /// </summary>
-        public TownTerrainData AddTerrain(int cfgID, int x, int y, int endX, int endY)
+        public MapTerrainData AddTerrain(int cfgID, int x, int y, int endX, int endY)
         {
-            var rect = TownMapHelper.EncodeLandRect(x, y, endX, endY);
-            var terrain = new TownTerrainData
+            var rect = MapHelper.EncodeLandRect(x, y, endX, endY);
+            var terrain = new MapTerrainData
             {
                 rect = rect,
                 cfgID = cfgID
@@ -201,9 +199,9 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 添加区域
         /// </summary>
-        public TownAreaData AddArea(int cfgID, int x, int y, int endX, int endY)
+        public MapAreaData AddArea(int cfgID, int x, int y, int endX, int endY)
         {
-            var area = new TownAreaData
+            var area = new MapAreaData
             {
                 cfgID = cfgID,
                 x = x,
@@ -231,7 +229,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 设置网格掩码
         /// </summary>
-        public void SetGridMask(int x, int y, TownGridMaskType mask)
+        public void SetGridMask(int x, int y, MapGridMaskType mask)
         {
             mapData.SetGridMask(x, y, mask);
             OnGridMaskChanged?.Invoke(x, y, mask);
@@ -241,7 +239,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 批量设置网格掩码
         /// </summary>
-        public void SetGridMasks(int startX, int startY, int endX, int endY, TownGridMaskType mask)
+        public void SetGridMasks(int startX, int startY, int endX, int endY, MapGridMaskType mask)
         {
             for (int y = startY; y <= endY; y++)
             {
@@ -283,7 +281,7 @@ namespace Onemt.Framework.Town
             try
             {
                 var bytes = File.ReadAllBytes(filePath);
-                mapData = MemoryPackSerializer.Deserialize<TownMapData>(bytes);
+                mapData = MemoryPackSerializer.Deserialize<MapData>(bytes);
                 
                 // 更新编辑器状态
                 gridCountX = mapData.gridCountX;
@@ -332,7 +330,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 获取地图数据
         /// </summary>
-        public TownMapData GetMapData()
+        public MapData GetMapData()
         {
             return mapData;
         }
@@ -340,7 +338,7 @@ namespace Onemt.Framework.Town
         /// <summary>
         /// 设置地图数据
         /// </summary>
-        public void SetMapData(TownMapData data)
+        public void SetMapData(MapData data)
         {
             mapData = data;
             UpdateIDCounters();
@@ -363,7 +361,7 @@ namespace Onemt.Framework.Town
             {
                 for (int x = 1; x <= gridCountX; x++)
                 {
-                    var center = TownMapHelper.GridCenterWorldPos(x, y);
+                    var center = MapHelper.GridCenterWorldPos(x, y);
                     var size = Vector3.one * perGridSize * 0.9f;
                     Gizmos.DrawWireCube(new Vector3(center.x, 0, center.y), size);
                 }
@@ -382,10 +380,10 @@ namespace Onemt.Framework.Town
                 for (int x = 1; x <= gridCountX; x++)
                 {
                     var mask = mapData.GetGridMask(x, y);
-                    if (mask != TownGridMaskType.None)
+                    if (mask != MapGridMaskType.None)
                     {
                         Gizmos.color = maskColor;
-                        var center = TownMapHelper.GridCenterWorldPos(x, y);
+                        var center = MapHelper.GridCenterWorldPos(x, y);
                         var size = Vector3.one * perGridSize * 0.5f;
                         Gizmos.DrawCube(new Vector3(center.x, 0, center.y), size);
                     }
@@ -412,7 +410,7 @@ namespace Onemt.Framework.Town
         /// </summary>
         public Vector3 GetGridWorldPosition(int gridX, int gridY)
         {
-            var pos = TownMapHelper.GridCenterWorldPos(gridX, gridY);
+            var pos = MapHelper.GridCenterWorldPos(gridX, gridY);
             return new Vector3(pos.x, 0, pos.y);
         }
 
@@ -421,7 +419,7 @@ namespace Onemt.Framework.Town
         /// </summary>
         public Vector2Int WorldToGrid(Vector3 worldPos)
         {
-            return TownMapHelper.Pos2Grid(worldPos.x, worldPos.z);
+            return MapHelper.Pos2Grid(worldPos.x, worldPos.z);
         }
 
         #endregion
