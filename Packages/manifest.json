@@ -2,6 +2,7 @@
   "dependencies": {
     "com.cysharp.memorypack": "file:../Packages_Custom/MemoryPack",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.seanba.super-tiled2unity": "file:../Packages_Custom/com.seanba.super-tiled2unity",
     "com.statecontroller": "file:../Packages_Custom/StateController",
     "com.tuyoogame.yooasset": "file:../Packages_Custom/YooAsset",
     "com.unity.2d.sprite": "1.0.0",
