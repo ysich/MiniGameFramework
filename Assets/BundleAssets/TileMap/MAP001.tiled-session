@@ -1,0 +1,38 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "/Users/sicy/Desktop/MyProbject/MiniGameFramework/Assets/BundleAssets/Map/map001.tmx": {
+            "scale": 0.2806,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 4103.7063435495365,
+                "y": 1530.648610121169
+            }
+        }
+    },
+    "last.exportedFilePath": "/Users/sicy/Desktop/MyProbject/MiniGameFramework/Assets/BundleAssets/Map",
+    "last.imagePath": "H:/热血穿三国/游戏地图资源/MAP/map001",
+    "map.height": 40,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 50,
+    "map.tileWidth": 50,
+    "map.width": 80,
+    "openFiles": [
+    ],
+    "project": "MAP001.tiled-project",
+    "property.type": "bool",
+    "recentFiles": [
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 50,
+        "width": 50
+    }
+}
