@@ -1,16 +1,16 @@
-﻿/******************************************************************************
+/******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated July 28, 2023. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2023, Esoteric Software LLC
+ * Copyright (c) 2013-2025, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
  * conditions of Section 2 of the Spine Editor License Agreement:
  * http://esotericsoftware.com/spine-editor-license
  *
- * Otherwise, it is permitted to integrate the Spine Runtimes into software or
- * otherwise create derivative works of the Spine Runtimes (collectively,
+ * Otherwise, it is permitted to integrate the Spine Runtimes into software
+ * or otherwise create derivative works of the Spine Runtimes (collectively,
  * "Products"), provided that each user of the Products must obtain their own
  * Spine Editor license and redistribution of the Products in any form must
  * include this license and copyright notice.
@@ -23,8 +23,8 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES,
  * BUSINESS INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE
- * SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
 using System;
@@ -68,7 +68,7 @@ namespace Spine {
 		/// <summary>The skeleton's transform constraints.</summary>
 		public ExposedList<TransformConstraint> TransformConstraints { get { return transformConstraints; } }
 
-		/// <summary>The skeleton's current skin.</summary>
+		/// <summary>The skeleton's current skin. May be null. See <see cref="SetSkin(Spine.Skin)"/></summary>
 		public Skin Skin {
 			/// <summary>The skeleton's current skin. May be null.</summary>
 			get { return skin; }
@@ -117,13 +117,6 @@ namespace Spine {
 			bones = new ExposedList<Bone>(data.bones.Count);
 			Bone[] bonesItems = this.bones.Items;
 			foreach (BoneData boneData in data.bones) {
-				// 处理 空骨骼
-				if (boneData == null)
-				{
-					this.bones.Add(null);
-					continue;
-				}
-
 				Bone bone;
 				if (boneData.parent == null) {
 					bone = new Bone(boneData, this, null);
@@ -138,12 +131,6 @@ namespace Spine {
 			slots = new ExposedList<Slot>(data.slots.Count);
 			drawOrder = new ExposedList<Slot>(data.slots.Count);
 			foreach (SlotData slotData in data.slots) {
-				if (slotData == null)
-				{
-                    slots.Add(null);
-                    drawOrder.Add(null);
-                    continue;
-                }
 				Bone bone = bonesItems[slotData.boneData.index];
 				Slot slot = new Slot(slotData, bone);
 				slots.Add(slot);
@@ -239,8 +226,7 @@ namespace Spine {
 			Bone[] bones = this.bones.Items;
 			for (int i = 0; i < boneCount; i++) {
 				Bone bone = bones[i];
-                if (bone == null) continue;
-                bone.sorted = bone.data.skinRequired;
+				bone.sorted = bone.data.skinRequired;
 				bone.active = !bone.sorted;
 			}
 			if (skin != null) {
@@ -416,7 +402,7 @@ namespace Spine {
 		}
 
 		private void SortBone (Bone bone) {
-			if (bone == null || bone.sorted) return;
+			if (bone.sorted) return;
 			Bone parent = bone.parent;
 			if (parent != null) SortBone(parent);
 			bone.sorted = true;
@@ -443,8 +429,7 @@ namespace Spine {
 			Bone[] bones = this.bones.Items;
 			for (int i = 0, n = this.bones.Count; i < n; i++) {
 				Bone bone = bones[i];
-                if (bones[i] == null) continue;
-                bone.ax = bone.x;
+				bone.ax = bone.x;
 				bone.ay = bone.y;
 				bone.arotation = bone.rotation;
 				bone.ascaleX = bone.scaleX;
@@ -576,7 +561,7 @@ namespace Spine {
 			return null;
 		}
 
-		/// <summary>Sets a skin by name (see <see cref="SetSkin(Skin)"/>).</summary>
+		/// <summary>Sets a skin by name (see <see cref="SetSkin(Spine.Skin)"/>).</summary>
 		public void SetSkin (string skinName) {
 			Skin foundSkin = data.FindSkin(skinName);
 			if (foundSkin == null) throw new ArgumentException("Skin not found: " + skinName, "skinName");
@@ -605,7 +590,6 @@ namespace Spine {
 					Slot[] slots = this.slots.Items;
 					for (int i = 0, n = this.slots.Count; i < n; i++) {
 						Slot slot = slots[i];
-						if (slot == null) continue;
 						string name = slot.data.attachmentName;
 						if (name != null) {
 							Attachment attachment = newSkin.GetAttachment(i, name);
@@ -753,7 +737,7 @@ namespace Spine {
 
 				if (vertices != null) {
 					if (clipper != null && clipper.IsClipping) {
-						clipper.ClipTriangles(vertices, verticesLength, triangles, triangles.Length);
+						clipper.ClipTriangles(vertices, triangles, triangles.Length);
 						vertices = clipper.ClippedVertices.Items;
 						verticesLength = clipper.ClippedVertices.Count;
 					}

@@ -6,7 +6,6 @@
 #include "../../CGIncludes/Spine-Common.cginc"
 
 #pragma multi_compile __ UNITY_UI_ALPHACLIP
-#pragma multi_compile __ UNITY_UI_CLIP_RECT
 
 struct VertexInput {
 	float4 vertex   : POSITION;
@@ -18,12 +17,8 @@ struct VertexInput {
 struct VertexOutput {
 	float4 vertex   : SV_POSITION;
 	fixed4 color    : COLOR;
-	half2 texcoord  : TEXCOORD0;
+	float2 texcoord  : TEXCOORD0;
 	float4 worldPosition : TEXCOORD1;
-
-#ifdef UNITY_UI_CLIP_RECT
-                half4  mask : TEXCOORD2;
-#endif //UNITY_UI_CLIP_RECT
 	UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -31,10 +26,7 @@ struct VertexOutput {
 fixed4 _Color;
 #endif
 fixed4 _TextureSampleAdd;
-
-#ifdef UNITY_UI_CLIP_RECT
 float4 _ClipRect;
-#endif
 
 #ifdef ENABLE_FILL
 float4 _FillColor;
@@ -42,11 +34,6 @@ float _FillPhase;
 #endif
 #ifdef ENABLE_GRAYSCALE
 float _GrayPhase;
-#endif
-
-#ifdef UNITY_UI_CLIP_RECT
-    half _UIMaskSoftnessX;
-    half _UIMaskSoftnessY;
 #endif
 
 VertexOutput vert (VertexInput IN) {
@@ -80,13 +67,6 @@ VertexOutput vert (VertexInput IN) {
 	OUT.color *= float4(_Color.rgb * _Color.a, _Color.a); // Combine a PMA version of _Color with vertexColor.
 #endif
 
-    #ifdef UNITY_UI_CLIP_RECT
-        float2 pixelSize = OUT.vertex.w;
-        pixelSize /= float2(1, 1) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
-        float4 clampedRect = clamp(_ClipRect, -2e10, 2e10);
-        OUT.mask = half4(IN.vertex.xy * 2 - clampedRect.xy - clampedRect.zw, 0.25 / (0.25 * half2(_UIMaskSoftnessX, _UIMaskSoftnessY) + abs(pixelSize.xy)));
-    #endif //UNITY_UI_CLIP_RECT
-
 	return OUT;
 }
 
@@ -101,10 +81,7 @@ fixed4 frag (VertexOutput IN) : SV_Target
 	#endif
 
 	half4 color = (texColor + _TextureSampleAdd) * IN.color;
-	
-    #ifdef UNITY_UI_CLIP_RECT
 	color *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
-	#endif
 
 	#ifdef UNITY_UI_ALPHACLIP
 	clip (color.a - 0.001);
@@ -116,12 +93,6 @@ fixed4 frag (VertexOutput IN) : SV_Target
 	#ifdef ENABLE_GRAYSCALE
 	color.rgb = lerp(color.rgb, dot(color.rgb, float3(0.3, 0.59, 0.11)), _GrayPhase);
 	#endif
-
-	#ifdef UNITY_UI_CLIP_RECT
-        half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(IN.mask.xy)) * IN.mask.zw);
-        color.a *= m.x * m.y;
-	#endif  //UNITY_UI_CLIP_RECT
-
 	return color;
 }
 

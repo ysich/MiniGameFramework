@@ -9,10 +9,6 @@ Shader "Spine/SkeletonGraphic"
 		[Toggle(_CANVAS_GROUP_COMPATIBLE)] _CanvasGroupCompatible("CanvasGroup Compatible", Int) = 1
 		_Color ("Tint", Color) = (1,1,1,1)
 
-		// 纯色.  a通道控制纯色程度
-		_PureColor ("Pure Color", Color) = (1,1,1,0)
-
-
 		[HideInInspector][Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Float) = 8
 		[HideInInspector] _Stencil ("Stencil ID", Float) = 0
 		[HideInInspector][Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Float) = 0
@@ -25,16 +21,15 @@ Shader "Spine/SkeletonGraphic"
 
 		// Outline properties are drawn via custom editor.
 		[HideInInspector] _OutlineWidth("Outline Width", Range(0,8)) = 3.0
+		[HideInInspector][MaterialToggle(_USE_SCREENSPACE_OUTLINE_WIDTH)] _UseScreenSpaceOutlineWidth("Width in Screen Space", Float) = 0
 		[HideInInspector] _OutlineColor("Outline Color", Color) = (1,1,0,1)
+		[HideInInspector][MaterialToggle(_OUTLINE_FILL_INSIDE)]_Fill("Fill", Float) = 0
 		[HideInInspector] _OutlineReferenceTexWidth("Reference Texture Width", Int) = 1024
 		[HideInInspector] _ThresholdEnd("Outline Threshold", Range(0,1)) = 0.25
 		[HideInInspector] _OutlineSmoothness("Outline Smoothness", Range(0,1)) = 1.0
 		[HideInInspector][MaterialToggle(_USE8NEIGHBOURHOOD_ON)] _Use8Neighbourhood("Sample 8 Neighbours", Float) = 1
 		[HideInInspector] _OutlineOpaqueAlpha("Opaque Alpha", Range(0,1)) = 1.0
 		[HideInInspector] _OutlineMipLevel("Outline Mip Level", Range(0,3)) = 0
-
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend("__src", Float) = 5
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlend("__dst", Float) = 10
 	}
 
 	SubShader
@@ -62,7 +57,7 @@ Shader "Spine/SkeletonGraphic"
 		ZWrite Off
 		ZTest [unity_GUIZTestMode]
 		Fog { Mode Off }
-		Blend [_SrcBlend] [_DstBlend]
+		Blend One OneMinusSrcAlpha
 		ColorMask [_ColorMask]
 
 		Pass
@@ -76,8 +71,7 @@ Shader "Spine/SkeletonGraphic"
 			#pragma fragment frag
 			#pragma target 2.0
 
-			#include "CGIncludes/Spine-SkeletonGraphic-NormalPass-PureColor.cginc"
-
+			#include "CGIncludes/Spine-SkeletonGraphic-NormalPass.cginc"
 		ENDCG
 		}
 	}

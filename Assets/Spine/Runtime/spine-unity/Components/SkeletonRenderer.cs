@@ -1,16 +1,16 @@
 /******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated July 28, 2023. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2023, Esoteric Software LLC
+ * Copyright (c) 2013-2025, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
  * conditions of Section 2 of the Spine Editor License Agreement:
  * http://esotericsoftware.com/spine-editor-license
  *
- * Otherwise, it is permitted to integrate the Spine Runtimes into software or
- * otherwise create derivative works of the Spine Runtimes (collectively,
+ * Otherwise, it is permitted to integrate the Spine Runtimes into software
+ * or otherwise create derivative works of the Spine Runtimes (collectively,
  * "Products"), provided that each user of the Products must obtain their own
  * Spine Editor license and redistribution of the Products in any form must
  * include this license and copyright notice.
@@ -23,8 +23,8 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES,
  * BUSINESS INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE
- * SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
 #if UNITY_2018_3 || UNITY_2019 || UNITY_2018_3_OR_NEWER
@@ -303,7 +303,7 @@ namespace Spine.Unity {
 		[SerializeField] protected Transform physicsMovementRelativeTo = null;
 
 		/// <summary>Used for applying Transform translation to skeleton PhysicsConstraints.</summary>
-		protected Vector2 lastPosition;
+		protected Vector3 lastPosition;
 		/// <summary>Used for applying Transform rotation to skeleton PhysicsConstraints.</summary>
 		protected float lastRotation;
 
@@ -473,7 +473,7 @@ namespace Spine.Unity {
 			if (skeletonDataAsset == null)
 				return;
 
-			SkeletonData skeletonData = skeletonDataAsset.GetSkeletonData(false);
+			SkeletonData skeletonData = skeletonDataAsset.GetSkeletonData(quiet);
 			if (skeletonData == null) return;
 			valid = true;
 
@@ -520,14 +520,16 @@ namespace Spine.Unity {
 		public virtual void ApplyTransformMovementToPhysics () {
 			if (Application.isPlaying) {
 				if (physicsPositionInheritanceFactor != Vector2.zero) {
-					Vector2 position = GetPhysicsTransformPosition();
-					Vector2 positionDelta = position - lastPosition;
+					Vector3 position = GetPhysicsTransformPosition();
+					Vector3 positionDelta = position - lastPosition;
+
+					positionDelta = transform.InverseTransformVector(positionDelta);
 					if (physicsMovementRelativeTo != null) {
-						positionDelta.x *= physicsMovementRelativeTo.lossyScale.x;
-						positionDelta.y *= physicsMovementRelativeTo.lossyScale.y;
+						positionDelta = physicsMovementRelativeTo.TransformVector(positionDelta);
 					}
-					positionDelta.x *= physicsPositionInheritanceFactor.x / transform.lossyScale.x;
-					positionDelta.y *= physicsPositionInheritanceFactor.y / transform.lossyScale.y;
+					positionDelta.x *= physicsPositionInheritanceFactor.x;
+					positionDelta.y *= physicsPositionInheritanceFactor.y;
+
 					skeleton.PhysicsTranslate(positionDelta.x, positionDelta.y);
 					lastPosition = position;
 				}
@@ -539,7 +541,7 @@ namespace Spine.Unity {
 			}
 		}
 
-		protected Vector2 GetPhysicsTransformPosition () {
+		protected Vector3 GetPhysicsTransformPosition () {
 			if (physicsMovementRelativeTo == null) {
 				return transform.position;
 			} else {

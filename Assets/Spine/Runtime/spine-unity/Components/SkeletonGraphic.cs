@@ -1,16 +1,16 @@
-﻿/******************************************************************************
+/******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated July 28, 2023. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2023, Esoteric Software LLC
+ * Copyright (c) 2013-2025, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
  * conditions of Section 2 of the Spine Editor License Agreement:
  * http://esotericsoftware.com/spine-editor-license
  *
- * Otherwise, it is permitted to integrate the Spine Runtimes into software or
- * otherwise create derivative works of the Spine Runtimes (collectively,
+ * Otherwise, it is permitted to integrate the Spine Runtimes into software
+ * or otherwise create derivative works of the Spine Runtimes (collectively,
  * "Products"), provided that each user of the Products must obtain their own
  * Spine Editor license and redistribution of the Products in any form must
  * include this license and copyright notice.
@@ -23,8 +23,8 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES,
  * BUSINESS INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE
- * SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
 #if UNITY_2018_3 || UNITY_2019 || UNITY_2018_3_OR_NEWER
@@ -77,7 +77,9 @@ namespace Spine.Unity {
 		public float timeScale = 1f;
 		public bool freeze;
 		protected float meshScale = 1f;
+		protected Vector2 meshOffset = Vector2.zero;
 		public float MeshScale { get { return meshScale; } }
+		public Vector2 MeshOffset { get { return meshOffset; } }
 
 		public enum LayoutMode {
 			None = 0,
@@ -88,7 +90,10 @@ namespace Spine.Unity {
 		}
 		public LayoutMode layoutScaleMode = LayoutMode.None;
 		[SerializeField] protected Vector2 referenceSize = Vector2.one;
+		/// <summary>Offset relative to the pivot position, before potential layout scale is applied.</summary>
+		[SerializeField] protected Vector2 pivotOffset = Vector2.zero;
 		[SerializeField] protected float referenceScale = 1f;
+		[SerializeField] protected float layoutScale = 1f;
 #if UNITY_EDITOR
 		protected LayoutMode previousLayoutScaleMode = LayoutMode.None;
 		[SerializeField] protected Vector2 rectTransformSize = Vector2.zero;
@@ -127,9 +132,8 @@ namespace Spine.Unity {
 		public bool updateSeparatorPartLocation = true;
 		public bool updateSeparatorPartScale = false;
 
-        protected bool wasUpdatedAfterInit = true;
-		protected Texture baseTexture = null;
-
+		private bool wasUpdatedAfterInit = true;
+		private Texture baseTexture = null;
 
 #if UNITY_EDITOR
 		protected override void OnValidate () {
@@ -262,11 +266,11 @@ namespace Spine.Unity {
 		}
 
 
-		[System.NonSerialized] protected readonly Dictionary<Texture, Texture> customTextureOverride = new Dictionary<Texture, Texture>();
+		[System.NonSerialized] readonly Dictionary<Texture, Texture> customTextureOverride = new Dictionary<Texture, Texture>();
 		/// <summary>Use this Dictionary to override a Texture with a different Texture.</summary>
 		public Dictionary<Texture, Texture> CustomTextureOverride { get { return customTextureOverride; } }
 
-		[System.NonSerialized] protected readonly Dictionary<Texture, Material> customMaterialOverride = new Dictionary<Texture, Material>();
+		[System.NonSerialized] readonly Dictionary<Texture, Material> customMaterialOverride = new Dictionary<Texture, Material>();
 		/// <summary>Use this Dictionary to override the Material where the Texture was used at the original atlas.</summary>
 		public Dictionary<Texture, Material> CustomMaterialOverride { get { return customMaterialOverride; } }
 
@@ -358,14 +362,11 @@ namespace Spine.Unity {
 			wasUpdatedAfterInit = true;
 			if (updateMode < UpdateMode.OnlyAnimationStatus)
 				return;
-
-			var skelUpdateTime = Time.realtimeSinceStartup;
 			UpdateAnimationStatus(deltaTime);
 
 			if (updateMode == UpdateMode.OnlyAnimationStatus)
 				return;
 			ApplyAnimation();
-			//Debug.Log($"Skeleton Update时长= {Time.realtimeSinceStartup - skelUpdateTime}");
 		}
 
 		protected void SyncSubmeshGraphicsWithCanvasRenderers () {
@@ -404,12 +405,13 @@ namespace Spine.Unity {
 				if (physicsPositionInheritanceFactor != Vector2.zero) {
 					Vector2 position = GetPhysicsTransformPosition();
 					Vector2 positionDelta = (position - lastPosition) / meshScale;
+
+					positionDelta = transform.InverseTransformVector(positionDelta);
 					if (physicsMovementRelativeTo != null) {
-						positionDelta.x *= physicsMovementRelativeTo.lossyScale.x;
-						positionDelta.y *= physicsMovementRelativeTo.lossyScale.y;
+						positionDelta = physicsMovementRelativeTo.TransformVector(positionDelta);
 					}
-					positionDelta.x *= physicsPositionInheritanceFactor.x / transform.lossyScale.x;
-					positionDelta.y *= physicsPositionInheritanceFactor.y / transform.lossyScale.y;
+					positionDelta.x *= physicsPositionInheritanceFactor.x;
+					positionDelta.y *= physicsPositionInheritanceFactor.y;
 
 					skeleton.PhysicsTranslate(positionDelta.x, positionDelta.y);
 					lastPosition = position;
@@ -643,11 +645,11 @@ namespace Spine.Unity {
 
 		[SerializeField] protected Spine.Unity.MeshGenerator meshGenerator = new MeshGenerator();
 		public Spine.Unity.MeshGenerator MeshGenerator { get { return this.meshGenerator; } }
-		protected DoubleBuffered<Spine.Unity.MeshRendererBuffers.SmartMesh> meshBuffers;
-        protected SkeletonRendererInstruction currentInstructions = new SkeletonRendererInstruction();
-		protected readonly ExposedList<Mesh> meshes = new ExposedList<Mesh>();
-		protected readonly ExposedList<Material> usedMaterials = new ExposedList<Material>();
-		protected readonly ExposedList<Texture> usedTextures = new ExposedList<Texture>();
+		DoubleBuffered<Spine.Unity.MeshRendererBuffers.SmartMesh> meshBuffers;
+		SkeletonRendererInstruction currentInstructions = new SkeletonRendererInstruction();
+		readonly ExposedList<Mesh> meshes = new ExposedList<Mesh>();
+		readonly ExposedList<Material> usedMaterials = new ExposedList<Material>();
+		readonly ExposedList<Texture> usedTextures = new ExposedList<Texture>();
 
 		/// <summary>Returns the <see cref="SkeletonClipping"/> used by this renderer for use with e.g.
 		/// <see cref="Skeleton.GetBounds(out float, out float, out float, out float, ref float[], SkeletonClipping)"/>
@@ -719,7 +721,7 @@ namespace Spine.Unity {
 			return true;
 		}
 
-        protected void SetRectTransformBounds (Bounds combinedBounds) {
+		private void SetRectTransformBounds (Bounds combinedBounds) {
 			Vector3 size = combinedBounds.size;
 			Vector3 center = combinedBounds.center;
 			Vector2 p = new Vector2(
@@ -741,8 +743,9 @@ namespace Spine.Unity {
 				SetRectTransformSize(submeshGraphic, size);
 				submeshGraphic.rectTransform.pivot = p;
 			}
-
 			this.referenceSize = size;
+			referenceScale = referenceScale * layoutScale;
+			layoutScale = 1f;
 		}
 
 		public static void SetRectTransformSize (Graphic target, Vector2 size) {
@@ -804,7 +807,7 @@ namespace Spine.Unity {
 			SyncSubmeshGraphicsWithCanvasRenderers();
 		}
 
-		public virtual void Initialize (bool overwrite) {
+		public void Initialize (bool overwrite) {
 			if (this.IsValid && !overwrite) return;
 #if UNITY_EDITOR
 			if (BuildUtilities.IsInSkeletonAssetBuildPreProcessing)
@@ -942,10 +945,19 @@ namespace Spine.Unity {
 			meshScale = (canvas == null) ? 100 : canvas.referencePixelsPerUnit;
 			if (layoutScaleMode != LayoutMode.None) {
 				meshScale *= referenceScale;
-				if (!EditReferenceRect)
-					meshScale *= GetLayoutScale(layoutScaleMode);
+				layoutScale = GetLayoutScale(layoutScaleMode);
+				if (!EditReferenceRect) {
+					meshScale *= layoutScale;
+				}
+				meshOffset = pivotOffset * layoutScale;
+			} else {
+				meshOffset = pivotOffset;
 			}
-			meshGenerator.ScaleVertexData(meshScale);
+			if (meshOffset == Vector2.zero)
+				meshGenerator.ScaleVertexData(meshScale);
+			else
+				meshGenerator.ScaleAndOffsetVertexData(meshScale, meshOffset);
+
 			if (OnPostProcessVertices != null) OnPostProcessVertices.Invoke(this.meshGenerator.Buffers);
 
 			Mesh mesh = smartMesh.mesh;
@@ -1002,8 +1014,7 @@ namespace Spine.Unity {
 					}
 					usedTextureItems[i] = submeshMaterial.mainTexture;
 					if (!hasBlendModeMaterials) {
-                        //usedMaterialItems[i] = this.materialForRendering;
-                        SetUsedMaterialItem(usedMaterialItems, i, submeshMaterial); //使用附件的材质.  而不是 SkeletonGraphic 上的材质
+						usedMaterialItems[i] = this.materialForRendering;
 					} else {
 						BlendMode blendMode = blendModeMaterials.BlendModeForMaterial(submeshMaterial);
 						Material usedMaterial = this.materialForRendering;
@@ -1034,8 +1045,13 @@ namespace Spine.Unity {
 			meshScale = (canvas == null) ? 100 : canvas.referencePixelsPerUnit;
 			if (layoutScaleMode != LayoutMode.None) {
 				meshScale *= referenceScale;
-				if (!EditReferenceRect)
-					meshScale *= GetLayoutScale(layoutScaleMode);
+				layoutScale = GetLayoutScale(layoutScaleMode);
+				if (!EditReferenceRect) {
+					meshScale *= layoutScale;
+				}
+				meshOffset = pivotOffset * layoutScale;
+			} else {
+				meshOffset = pivotOffset;
 			}
 			// Generate meshes.
 			int submeshCount = currentInstructions.submeshInstructions.Count;
@@ -1052,22 +1068,20 @@ namespace Spine.Unity {
 			Texture[] usedTextureItems = usedTextures.Items;
 			for (int i = 0; i < submeshCount; i++) {
 				SubmeshInstruction submeshInstructionItem = currentInstructions.submeshInstructions.Items[i];
+				meshGenerator.Begin();
+				meshGenerator.AddSubmesh(submeshInstructionItem);
 
-				// 装扮优化
-                Mesh targetMesh = meshesItems[i];
-				MultiMeshGenerator(submeshInstructionItem, targetMesh);
-                if (OnPostProcessVertices != null) OnPostProcessVertices.Invoke(this.meshGenerator.Buffers);
+				Mesh targetMesh = meshesItems[i];
+				if (meshOffset == Vector2.zero)
+					meshGenerator.ScaleVertexData(meshScale);
+				else
+					meshGenerator.ScaleAndOffsetVertexData(meshScale, meshOffset);
+				if (OnPostProcessVertices != null) OnPostProcessVertices.Invoke(this.meshGenerator.Buffers);
+				meshGenerator.FillVertexData(targetMesh);
+				meshGenerator.FillTriangles(targetMesh);
+				meshGenerator.FillLateVertexData(targetMesh);
 
-                //meshGenerator.Begin();
-                //meshGenerator.AddSubmesh(submeshInstructionItem);
-                //Mesh targetMesh = meshesItems[i];
-                //meshGenerator.ScaleVertexData(meshScale);
-                //if (OnPostProcessVertices != null) OnPostProcessVertices.Invoke(this.meshGenerator.Buffers);
-                //meshGenerator.FillVertexData(targetMesh);
-                //meshGenerator.FillTriangles(targetMesh);
-                //meshGenerator.FillLateVertexData(targetMesh);
-
-                CanvasRenderer canvasRenderer = canvasRenderers[i];
+				CanvasRenderer canvasRenderer = canvasRenderers[i];
 				if (assignMeshOverrideSingle == null || !disableMeshAssignmentOnOverride)
 					canvasRenderer.SetMesh(targetMesh);
 				else
@@ -1227,7 +1241,7 @@ namespace Spine.Unity {
 		}
 
 #if UNITY_EDITOR
-		protected void RemoveNullCanvasRenderers () {
+		private void RemoveNullCanvasRenderers () {
 			if (Application.isEditor && !Application.isPlaying) {
 				for (int i = canvasRenderers.Count - 1; i >= 0; --i) {
 					if (canvasRenderers[i] == null) {
@@ -1238,7 +1252,7 @@ namespace Spine.Unity {
 			}
 		}
 
-        protected void DestroyOldRawImages () {
+		private void DestroyOldRawImages () {
 			foreach (CanvasRenderer canvasRenderer in canvasRenderers) {
 				RawImage oldRawImage = canvasRenderer.GetComponent<RawImage>();
 				if (oldRawImage != null) {
@@ -1331,7 +1345,7 @@ namespace Spine.Unity {
 		}
 
 #if UNITY_EDITOR
-        protected void RemoveNullSeparatorParts () {
+		private void RemoveNullSeparatorParts () {
 			if (Application.isEditor && !Application.isPlaying) {
 				for (int i = separatorParts.Count - 1; i >= 0; --i) {
 					if (separatorParts[i] == null) {
@@ -1360,9 +1374,9 @@ namespace Spine.Unity {
 					SetRectTransformSize(this, rectTransformSize);
 				}
 			}
-			if (editReferenceRect || layoutScaleMode == LayoutMode.None) {
+			if (editReferenceRect || layoutScaleMode == LayoutMode.None)
 				referenceSize = GetCurrentRectSize();
-			}
+
 			previousLayoutScaleMode = layoutScaleMode;
 		}
 
@@ -1383,13 +1397,7 @@ namespace Spine.Unity {
 			float referenceAspect = referenceSize.x / referenceSize.y;
 			Vector2 newSize = GetCurrentRectSize();
 
-			LayoutMode mode = previousLayoutScaleMode;
-			float frameAspect = newSize.x / newSize.y;
-			if (mode == LayoutMode.FitInParent)
-				mode = frameAspect > referenceAspect ? LayoutMode.HeightControlsWidth : LayoutMode.WidthControlsHeight;
-			else if (mode == LayoutMode.EnvelopeParent)
-				mode = frameAspect > referenceAspect ? LayoutMode.WidthControlsHeight : LayoutMode.HeightControlsWidth;
-
+			LayoutMode mode = GetEffectiveLayoutMode(previousLayoutScaleMode);
 			if (mode == LayoutMode.WidthControlsHeight)
 				newSize.y = newSize.x / referenceAspect;
 			else if (mode == LayoutMode.HeightControlsWidth)
@@ -1400,17 +1408,22 @@ namespace Spine.Unity {
 		public Vector2 GetReferenceRectSize () {
 			return referenceSize * GetLayoutScale(layoutScaleMode);
 		}
+
+		public Vector2 GetPivotOffset () {
+			return pivotOffset;
+		}
+
+		public Vector2 GetScaledPivotOffset () {
+			return pivotOffset * GetLayoutScale(layoutScaleMode);
+		}
 #endif
+		public void SetScaledPivotOffset (Vector2 pivotOffsetScaled) {
+			pivotOffset = pivotOffsetScaled / GetLayoutScale(layoutScaleMode);
+		}
 
 		protected float GetLayoutScale (LayoutMode mode) {
 			Vector2 currentSize = GetCurrentRectSize();
-			float referenceAspect = referenceSize.x / referenceSize.y;
-			float frameAspect = currentSize.x / currentSize.y;
-			if (mode == LayoutMode.FitInParent)
-				mode = frameAspect > referenceAspect ? LayoutMode.HeightControlsWidth : LayoutMode.WidthControlsHeight;
-			else if (mode == LayoutMode.EnvelopeParent)
-				mode = frameAspect > referenceAspect ? LayoutMode.WidthControlsHeight : LayoutMode.HeightControlsWidth;
-
+			mode = GetEffectiveLayoutMode(mode);
 			if (mode == LayoutMode.WidthControlsHeight) {
 				return currentSize.x / referenceSize.x;
 			} else if (mode == LayoutMode.HeightControlsWidth) {
@@ -1419,38 +1432,24 @@ namespace Spine.Unity {
 			return 1f;
 		}
 
-        protected Vector2 GetCurrentRectSize () {
+		/// <summary>
+		/// <c>LayoutMode FitInParent</c> and <c>EnvelopeParent</c> actually result in
+		/// <c>HeightControlsWidth</c> or <c>WidthControlsHeight</c> depending on the actual vs reference aspect ratio.
+		/// This method returns the respective <c>LayoutMode</c> of the two for any given input <c>mode</c>.
+		/// </summary>
+		protected LayoutMode GetEffectiveLayoutMode (LayoutMode mode) {
+			Vector2 currentSize = GetCurrentRectSize();
+			float referenceAspect = referenceSize.x / referenceSize.y;
+			float frameAspect = currentSize.x / currentSize.y;
+			if (mode == LayoutMode.FitInParent)
+				mode = frameAspect > referenceAspect ? LayoutMode.HeightControlsWidth : LayoutMode.WidthControlsHeight;
+			else if (mode == LayoutMode.EnvelopeParent)
+				mode = frameAspect > referenceAspect ? LayoutMode.WidthControlsHeight : LayoutMode.HeightControlsWidth;
+			return mode;
+		}
+
+		private Vector2 GetCurrentRectSize () {
 			return this.rectTransform.rect.size;
 		}
-
-
-        #region 修改源码
-
-        /// <summary>
-        ///  重载.
-        ///		Spine 默认所有值 Renderer 都是用 SkeletonGrapgic 组件上的 Material
-        ///		
-        ///  需要重载为 使用 Attachment的材质
-        /// </summary>
-        protected virtual void SetUsedMaterialItem(Material[] usedItems, int index, Material baseMat)
-		{
-			usedItems[index] = this.materialForRendering;
-        }
-
-		/// <summary>
-		///  每帧重新生成 Mesh计算
-		/// </summary>
-		protected virtual void MultiMeshGenerator(SubmeshInstruction submeshInstructionItem, Mesh targetMesh)
-		{
-			meshGenerator.Begin();
-			meshGenerator.AddSubmesh(submeshInstructionItem);
-			meshGenerator.ScaleVertexData(meshScale);
-			//if (OnPostProcessVertices != null) OnPostProcessVertices.Invoke(this.meshGenerator.Buffers);  // 提到函数外面
-			meshGenerator.FillVertexData(targetMesh);
-			meshGenerator.FillTriangles(targetMesh);
-			meshGenerator.FillLateVertexData(targetMesh);
-		}
-
-        #endregion
-    }
+	}
 }

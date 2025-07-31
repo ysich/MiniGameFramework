@@ -1,16 +1,16 @@
-﻿/******************************************************************************
+/******************************************************************************
  * Spine Runtimes License Agreement
- * Last updated July 28, 2023. Replaces all prior versions.
+ * Last updated April 5, 2025. Replaces all prior versions.
  *
- * Copyright (c) 2013-2023, Esoteric Software LLC
+ * Copyright (c) 2013-2025, Esoteric Software LLC
  *
  * Integration of the Spine Runtimes into software or otherwise creating
  * derivative works of the Spine Runtimes is permitted under the terms and
  * conditions of Section 2 of the Spine Editor License Agreement:
  * http://esotericsoftware.com/spine-editor-license
  *
- * Otherwise, it is permitted to integrate the Spine Runtimes into software or
- * otherwise create derivative works of the Spine Runtimes (collectively,
+ * Otherwise, it is permitted to integrate the Spine Runtimes into software
+ * or otherwise create derivative works of the Spine Runtimes (collectively,
  * "Products"), provided that each user of the Products must obtain their own
  * Spine Editor license and redistribution of the Products in any form must
  * include this license and copyright notice.
@@ -23,18 +23,43 @@
  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES,
  * BUSINESS INTERRUPTION, OR LOSS OF USE, DATA, OR PROFITS) HOWEVER CAUSED AND
  * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THE
- * SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THE SPINE RUNTIMES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
+
+//#define SPINE_ALLOW_UNSAFE // note: this define can be set via Edit - Preferences - Spine.
+
+#if UNITY_2021_2_OR_NEWER
+#define TEXT_ASSET_HAS_GET_DATA_BYTES
+#endif
+
+#if SPINE_ALLOW_UNSAFE && TEXT_ASSET_HAS_GET_DATA_BYTES
+#define UNSAFE_DIRECT_ACCESS_TEXT_ASSET_DATA
+#endif
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if UNSAFE_DIRECT_ACCESS_TEXT_ASSET_DATA
+using Unity.Collections;
+#endif
 using UnityEngine;
-
 using CompatibilityProblemInfo = Spine.Unity.SkeletonDataCompatibility.CompatibilityProblemInfo;
 
 namespace Spine.Unity {
+#if UNSAFE_DIRECT_ACCESS_TEXT_ASSET_DATA
+	public static class TextAssetExtensions {
+		public static Stream GetStreamUnsafe (this TextAsset textAsset) {
+			NativeArray<byte> dataNativeArray = textAsset.GetData<byte>();
+			return dataNativeArray.GetUnmanagedMemoryStream();
+		}
+
+		public static unsafe UnmanagedMemoryStream GetUnmanagedMemoryStream<T> (this NativeArray<T> nativeArray) where T : struct {
+			return new UnmanagedMemoryStream((byte*)global::Unity.Collections.LowLevel.Unsafe.
+				NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(nativeArray), nativeArray.Length);
+		}
+	}
+#endif
 
 	[CreateAssetMenu(fileName = "New SkeletonDataAsset", menuName = "Spine/SkeletonData Asset")]
 	public class SkeletonDataAsset : ScriptableObject {
@@ -85,7 +110,8 @@ namespace Spine.Unity {
 		}
 
 		/// <summary>
-		/// Creates a runtime SkeletonDataAsset.</summary>
+		/// Creates a runtime SkeletonDataAsset.
+		/// If you require blend mode materials, call <see cref="SetupRuntimeBlendModeMaterials"/> afterwards.</summary>
 		public static SkeletonDataAsset CreateRuntimeInstance (TextAsset skeletonDataFile, AtlasAssetBase[] atlasAssets, bool initialize, float scale = 0.01f) {
 			SkeletonDataAsset skeletonDataAsset = ScriptableObject.CreateInstance<SkeletonDataAsset>();
 			skeletonDataAsset.Clear();
@@ -97,6 +123,19 @@ namespace Spine.Unity {
 				skeletonDataAsset.GetSkeletonData(true);
 
 			return skeletonDataAsset;
+		}
+
+		/// <summary>If this SkeletonDataAsset has been created via <see cref="CreateRuntimeInstance"/>,
+		/// this method sets up blend mode materials for it.</summary>
+		public void SetupRuntimeBlendModeMaterials (bool applyAdditiveMaterial,
+			BlendModeMaterials.TemplateMaterials templateMaterials) {
+			blendModeMaterials.applyAdditiveMaterial = applyAdditiveMaterial;
+			blendModeMaterials.UpdateBlendmodeMaterialsRequiredState(GetSkeletonData(true));
+			bool anyMaterialsChanged = false;
+			BlendModeMaterials.CreateAndAssignMaterials(this, templateMaterials, ref anyMaterialsChanged);
+
+			Clear();
+			GetSkeletonData(true);
 		}
 		#endregion
 
@@ -174,9 +213,15 @@ namespace Spine.Unity {
 			SkeletonData loadedSkeletonData = null;
 
 			try {
-				if (hasBinaryExtension)
+				if (hasBinaryExtension) {
+#if UNSAFE_DIRECT_ACCESS_TEXT_ASSET_DATA
+					using (Stream stream = skeletonJSON.GetStreamUnsafe()) {
+						loadedSkeletonData = SkeletonDataAsset.ReadSkeletonData(stream, attachmentLoader, skeletonDataScale);
+					}
+#else
 					loadedSkeletonData = SkeletonDataAsset.ReadSkeletonData(skeletonJSON.bytes, attachmentLoader, skeletonDataScale);
-				else
+#endif
+				} else
 					loadedSkeletonData = SkeletonDataAsset.ReadSkeletonData(skeletonJSON.text, attachmentLoader, skeletonDataScale);
 			} catch (Exception ex) {
 				if (!quiet)
@@ -218,109 +263,7 @@ namespace Spine.Unity {
 			return skeletonData;
 		}
 
-        public SkeletonData GetSkeletonDataCustom(bool quiet, SkeletonData skelData, bool force = false)
-        {
-            // 不再检测 Json文件
-            //            if (skeletonJSON == null)
-            //            {
-            //#if UNITY_EDITOR
-            //                if (!errorIfSkeletonFileNullGlobal) quiet = true;
-            //#endif
-            //                if (!quiet)
-            //                    Debug.LogError("Skeleton JSON file not set for SkeletonData asset: " + name, this);
-            //                Clear();
-            //                return null;
-            //            }
-
-            // Disabled to support attachmentless/skinless SkeletonData.
-            //			if (atlasAssets == null) {
-            //				atlasAssets = new AtlasAsset[0];
-            //				if (!quiet)
-            //					Debug.LogError("Atlas not set for SkeletonData asset: " + name, this);
-            //				Clear();
-            //				return null;
-            //			}
-            //			#if !SPINE_TK2D
-            //			if (atlasAssets.Length == 0) {
-            //				Clear();
-            //				return null;
-            //			}
-            //			#else
-            //			if (atlasAssets.Length == 0 && spriteCollection == null) {
-            //				Clear();
-            //				return null;
-            //			}
-            //			#endif
-
-            if (skeletonData != null && !force)
-                return skeletonData;
-
-            AttachmentLoader attachmentLoader;
-            float skeletonDataScale;
-            Atlas[] atlasArray = this.GetAtlasArray();
-
-#if !SPINE_TK2D
-            attachmentLoader = (atlasArray.Length == 0) ? (AttachmentLoader)new RegionlessAttachmentLoader() : (AttachmentLoader)new AtlasAttachmentLoader(atlasArray);
-            skeletonDataScale = scale;
-#else
-			if (spriteCollection != null) {
-				attachmentLoader = new Spine.Unity.TK2D.SpriteCollectionAttachmentLoader(spriteCollection);
-				skeletonDataScale = (1.0f / (spriteCollection.invOrthoSize * spriteCollection.halfTargetHeight) * scale);
-			} else {
-				if (atlasArray.Length == 0) {
-					Reset();
-					if (!quiet) Debug.LogError("Atlas not set for SkeletonData asset: " + name, this);
-					return null;
-				}
-				attachmentLoader = new AtlasAttachmentLoader(atlasArray);
-				skeletonDataScale = scale;
-			}
-#endif
-
-            SkeletonData loadedSkeletonData = skelData;
-
-#if UNITY_EDITOR
-            if (loadedSkeletonData == null && !quiet && skeletonJSON != null)
-            {
-                string problemDescription = null;
-                bool isSpineSkeletonData;
-                SkeletonDataCompatibility.VersionInfo fileVersion = SkeletonDataCompatibility.GetVersionInfo(skeletonJSON, out isSpineSkeletonData, ref problemDescription);
-                if (problemDescription != null)
-                {
-                    if (!quiet)
-                        Debug.LogError(problemDescription, skeletonJSON);
-                    return null;
-                }
-                CompatibilityProblemInfo compatibilityProblemInfo = SkeletonDataCompatibility.GetCompatibilityProblemInfo(fileVersion);
-                if (compatibilityProblemInfo != null)
-                {
-                    SkeletonDataCompatibility.DisplayCompatibilityProblem(compatibilityProblemInfo.DescriptionString(), skeletonJSON);
-                    return null;
-                }
-            }
-#endif
-            if (loadedSkeletonData == null)
-                return null;
-
-            if (skeletonDataModifiers != null)
-            {
-                foreach (SkeletonDataModifierAsset modifier in skeletonDataModifiers)
-                {
-                    if (modifier != null && !(isUpgradingBlendModeMaterials && modifier is BlendModeMaterialsAsset))
-                    {
-                        modifier.Apply(loadedSkeletonData);
-                    }
-                }
-            }
-            if (!isUpgradingBlendModeMaterials)
-                blendModeMaterials.ApplyMaterials(loadedSkeletonData);
-
-            this.InitializeWithData(loadedSkeletonData);
-
-            return skeletonData;
-        }
-
-        internal void InitializeWithData (SkeletonData sd) {
+		internal void InitializeWithData (SkeletonData sd) {
 			this.skeletonData = sd;
 			this.stateData = new AnimationStateData(skeletonData);
 			FillStateData();
@@ -354,7 +297,7 @@ namespace Spine.Unity {
 			}
 		}
 
-		public Atlas[] GetAtlasArray () {
+		internal Atlas[] GetAtlasArray () {
 			List<Atlas> returnList = new System.Collections.Generic.List<Atlas>(atlasAssets.Length);
 			for (int i = 0; i < atlasAssets.Length; i++) {
 				AtlasAssetBase aa = atlasAssets[i];
@@ -375,6 +318,13 @@ namespace Spine.Unity {
 			}
 		}
 
+		internal static SkeletonData ReadSkeletonData (Stream assetStream, AttachmentLoader attachmentLoader, float scale) {
+			SkeletonBinary binary = new SkeletonBinary(attachmentLoader) {
+				Scale = scale
+			};
+			return binary.ReadSkeletonData(assetStream);
+		}
+
 		internal static SkeletonData ReadSkeletonData (string text, AttachmentLoader attachmentLoader, float scale) {
 			StringReader input = new StringReader(text);
 			SkeletonJson json = new SkeletonJson(attachmentLoader) {
@@ -382,33 +332,6 @@ namespace Spine.Unity {
 			};
 			return json.ReadSkeletonData(input);
 		}
-
-
-		public AttachmentLoader GetAttachmentLoader(out float skeletonDataScale)
-		{
-            Atlas[] atlasArray = this.GetAtlasArray(); // TODO:  缓存 减少GC
-            AttachmentLoader attachmentLoader = null;
-#if !SPINE_TK2D
-            attachmentLoader = (atlasArray.Length == 0) ? (AttachmentLoader)new RegionlessAttachmentLoader() : (AttachmentLoader)new AtlasAttachmentLoader(atlasArray);
-            skeletonDataScale = scale;
-#else
-			if (spriteCollection != null) {
-				attachmentLoader = new Spine.Unity.TK2D.SpriteCollectionAttachmentLoader(spriteCollection);
-				skeletonDataScale = (1.0f / (spriteCollection.invOrthoSize * spriteCollection.halfTargetHeight) * scale);
-			} else {
-				if (atlasArray.Length == 0) {
-					Reset();
-					if (!quiet) Debug.LogError("Atlas not set for SkeletonData asset: " + name, this);
-					return null;
-				}
-				attachmentLoader = new AtlasAttachmentLoader(atlasArray);
-				skeletonDataScale = scale;
-			}
-#endif
-
-			return attachmentLoader;
-        }
-
-    }
+	}
 
 }
